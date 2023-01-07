@@ -1,11 +1,9 @@
-import RestaurantSchema from "./Schemas/index.js";
-import FoodItemschema from "./Schemas/index.js";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import { Console } from "console";
+import { Restaurants, order } from "./Models/index.js";
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -16,27 +14,47 @@ mongoose
   })
   .then(() => console.log("DB Connected"));
 mongoose.pluralize(null);
-const Restaurants = mongoose.model("restaurants", RestaurantSchema);
-const foodItem = mongoose.model("menu", FoodItemschema, "menu");
-app.get("/:restroId/:tabNo", async (request, response) => {
+
+app.get("/:restaurantId/:tabNo", async (request, response) => {
   Restaurants.find({
-    uuid: request.params.restroId,
+    uuid: request.params.restaurantId,
   })
     .setOptions({ strictQuery: false })
     .then((res) => response.send(res[0]));
 });
-app.post("/addFoodItem", (req, res) => {
-  const Item = new foodItem({
+app.get("/:restaurantId/:tabNo/getActiveOrders", async (request, response) => {
+  Restaurants.find({
+    active: true,
+  })
+    .setOptions({ strictQuery: false })
+    .then((res) => response.send(res));
+});
+// app.post("/addFoodItem", (req, res) => {
+//   const Item = new foodItem({
+//     uuid: uuidv4(),
+//     name: req.body.name,
+//     price: req.body.price,
+//     imageUrl: "",
+//     shortDescription: req.body.shortDescription,
+//     rating: "",
+//     vegOrNonVeg: "",
+//   });
+//   Item.save();
+//   res.json({ message: "New item created." });
+// });
+app.post("/placeOrder", (req, res) => {
+  console.log(req.body);
+  const Order = new order({
     uuid: uuidv4(),
-    name: req.body.name,
-    price: req.body.price,
-    imageUrl: "",
-    shortDescription: req.body.shortDescription,
-    rating: "",
-    vegOrNonVeg: "",
+    tableNo: req.body.tableNo,
+    items: req.body.items,
+    active: true,
+    amount: req.body.amount,
+    note: req.body.note,
+    restaurantId: req.body.restaurantId,
   });
-  Item.save();
-  res.json({ message: "New item created." });
+  Order.save();
+  res.json({ message: "Order Placed Successfully", status: 200 });
 });
 app.listen(4000, function () {
   console.log("Server started");

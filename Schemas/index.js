@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const FoodItemschema = new mongoose.Schema({
+export const FoodItemschema = new mongoose.Schema({
   uuid: String,
   name: String,
   price: Number,
@@ -9,7 +9,7 @@ const FoodItemschema = new mongoose.Schema({
   vegOrNonVeg: String,
 });
 
-const RestaurantSchema = new mongoose.Schema({
+export const RestaurantSchema = new mongoose.Schema({
   uuid: String,
   name: String,
   menu: Array,
@@ -17,4 +17,12 @@ const RestaurantSchema = new mongoose.Schema({
   address: String,
 });
 
-export default { RestaurantSchema, FoodItemschema };
+export const OrderSchema = new mongoose.Schema({
+  uuid: String,
+  tableNo: String,
+  items: Array,
+  active: Boolean,
+  amount: Number,
+  note: String,
+  restaurantId: String,
+});

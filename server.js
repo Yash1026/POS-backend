@@ -1,4 +1,4 @@
-import express from "express";
+import express, { request } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import mongoose from "mongoose";
@@ -18,7 +18,6 @@ mongoose
 mongoose.pluralize(null);
 
 app.get("/:restaurantId", async (request, response) => {
-  console.log("aya");
   Restaurants.find({
     uuid: request.params.restaurantId,
   })
@@ -81,19 +80,19 @@ app.get("/:restaurantId/home", async (req, res) => {
   });
 });
 
-// app.post("/addFoodItem", (req, res) => {
-//   const Item = new foodItem({
-//     uuid: uuidv4(),
-//     name: req.body.name,
-//     price: req.body.price,
-//     imageUrl: "",
-//     shortDescription: req.body.shortDescription,
-//     rating: "",
-//     vegOrNonVeg: "",
-//   });
-//   Item.save();
-//   res.json({ message: "New item created." });
-// });
+app.post("/changeOrderStatus", (req, res) => {
+  var myquery = { uuid: req.body.orderId };
+  var newvalues = { $set: { status: req.body.status } };
+  order.updateOne(myquery, newvalues, (err, response) => {
+    if (response.modifiedCount == 1) {
+      res.json({ message: "Order Status Updated Successfully", status: 200 });
+    } else {
+      res
+        .status(501)
+        .send({ message: "Order Status Update Failed", status: 501 });
+    }
+  });
+});
 app.post("/placeOrder", (req, res) => {
   const Order = new order({
     uuid: uuidv4(),

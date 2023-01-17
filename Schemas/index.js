@@ -6,14 +6,18 @@ export const FoodItemschema = new mongoose.Schema({
   price: Number,
   imageUrl: String,
   shortDescription: String,
-  rating: String,
-  vegOrNonVeg: String,
+  rating: Number,
+  veg: Boolean,
+});
+var MenuSchema = new mongoose.Schema({
+  category: String,
+  foodItems: [FoodItemschema],
 });
 
 export const RestaurantSchema = new mongoose.Schema({
   uuid: String,
   name: String,
-  menu: Array,
+  menu: [MenuSchema],
   rating: Number,
   address: String,
 });

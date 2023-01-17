@@ -48,20 +48,20 @@ app.get("/:restaurantId/home", async (req, res) => {
     })
     .setOptions({ strictQuery: false });
 
-  const today = await order
+  const thisWeek = await order
     .find({
-      status: { $in: ["completed", "cancelled", "active"] },
+      status: { $in: ["completed", "cancelled"] },
       restaurantId: restaurantId,
       timeStamp: {
-        $gte: new Date(moment().local().startOf("day").format()),
-        $lt: new Date(moment().local().startOf("day").add(1, "day").format()),
+        $gte: new Date(moment().local().startOf("week").format()),
+        $lt: new Date(moment().local().endOf("week").format()),
       },
     })
     .setOptions({ strictQuery: false });
 
   const thisMonth = await order
     .find({
-      status: { $in: ["completed", "cancelled", "active"] },
+      status: { $in: ["completed", "cancelled"] },
       restaurantId: restaurantId,
       timeStamp: {
         $gte: new Date(moment().local().startOf("month").format()),
@@ -75,7 +75,7 @@ app.get("/:restaurantId/home", async (req, res) => {
   res.send({
     active: active,
     completed: completed,
-    today: today,
+    thisWeek: thisWeek,
     thisMonth: thisMonth,
   });
 });
@@ -92,6 +92,31 @@ app.post("/changeOrderStatus", (req, res) => {
         .send({ message: "Order Status Update Failed", status: 501 });
     }
   });
+});
+app.post("/updateFoodItem", async (req, res) => {
+  Restaurants.updateOne(
+    { uuid: req.body.restaurantId },
+    {
+      $set: {
+        "menu.$[].foodItems.$[xxx].category": req.body.category,
+        "menu.$[].foodItems.$[xxx].name": req.body.name,
+        "menu.$[].foodItems.$[xxx].price": req.body.price,
+        "menu.$[].foodItems.$[xxx].shortDescription": req.body.shortDescription,
+        "menu.$[].foodItems.$[xxx].imageUrl": req.body.imageUrl,
+        "menu.$[].foodItems.$[xxx].veg": req.body.veg,
+      },
+    },
+    { arrayFilters: [{ "xxx.uuid": req.body.foodItemId }] },
+    (err, response) => {
+      if (response.modifiedCount == 1) {
+        res.json({ message: "Food Item Updated Successfully", status: 200 });
+      } else {
+        res
+          .status(501)
+          .send({ message: "Food Item Update Failed", status: 501 });
+      }
+    }
+  );
 });
 app.post("/placeOrder", (req, res) => {
   const Order = new order({
